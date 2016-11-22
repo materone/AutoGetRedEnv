@@ -24,6 +24,7 @@
 		C507B7101C9FD1E1008455DA /* autoGetRedEnv.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = autoGetRedEnv.mm; sourceTree = "<group>"; };
 		C507B7141C9FD1E1008455DA /* 0xdeadfa11 */ = {isa = PBXFileReference; lastKnownFileType = text; name = 0xdeadfa11; path = Package/usr/lib/0xdeadfa11; sourceTree = "<group>"; };
 		C507B71A1C9FD25D008455DA /* CaptainHook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CaptainHook.h; sourceTree = "<group>"; };
+		EA74ACE51DE34DB300A6723F /* copyfile.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = copyfile.sh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +69,7 @@
 		C507B7061C9FD1E1008455DA /* autoGetRedEnv */ = {
 			isa = PBXGroup;
 			children = (
+				EA74ACE41DE34D5F00A6723F /* script */,
 				C507B71A1C9FD25D008455DA /* CaptainHook.h */,
 				C507B7101C9FD1E1008455DA /* autoGetRedEnv.mm */,
 				C507B7071C9FD1E1008455DA /* Package */,
@@ -119,6 +121,14 @@
 			name = lib;
 			sourceTree = "<group>";
 		};
+		EA74ACE41DE34D5F00A6723F /* script */ = {
+			isa = PBXGroup;
+			children = (
+				EA74ACE51DE34DB300A6723F /* copyfile.sh */,
+			);
+			name = script;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -141,6 +151,7 @@
 				C507B6FB1C9FD1E1008455DA /* Frameworks */,
 				C507B6FC1C9FD1E1008455DA /* Headers */,
 				C507B6FD1C9FD1E1008455DA /* ShellScript */,
+				EA74ACE61DE34E1700A6723F /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -184,6 +195,21 @@
 /* Begin PBXShellScriptBuildPhase section */
 		C507B6FD1C9FD1E1008455DA /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+				"",
+			);
+			outputPaths = (
+				"",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/opt/iOSOpenDev/bin/iosod --xcbp";
+		};
+		EA74ACE61DE34E1700A6723F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -193,7 +219,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/opt/iOSOpenDev/bin/iosod --xcbp";
+			shellScript = /Users/tony/Dev/AutoGetRedEnv/autoGetRedEnv/copyfile.sh;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -230,7 +256,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(iOSOpenDevPath)/include/**";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LIBRARY_SEARCH_PATHS = "$(iOSOpenDevPath)/lib/**";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -253,7 +279,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(iOSOpenDevPath)/include/**";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LIBRARY_SEARCH_PATHS = "$(iOSOpenDevPath)/lib/**";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -265,7 +291,7 @@
 		C507B7181C9FD1E1008455DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: XIN TAN (76DJU7N3CS)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
@@ -273,7 +299,7 @@
 				GCC_PREFIX_HEADER = "autoGetRedEnv/autoGetRedEnv-Prefix.pch";
 				INSTALL_PATH = /usr/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = arm64;
+				VALID_ARCHS = "arm64 armv7";
 				iOSOpenDevBuildPackageOnAnyBuild = NO;
 				iOSOpenDevCopyOnBuild = NO;
 				iOSOpenDevDevice = "";
@@ -287,7 +313,7 @@
 		C507B7191C9FD1E1008455DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: XIN TAN (76DJU7N3CS)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
@@ -295,7 +321,7 @@
 				GCC_PREFIX_HEADER = "autoGetRedEnv/autoGetRedEnv-Prefix.pch";
 				INSTALL_PATH = /usr/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = arm64;
+				VALID_ARCHS = "arm64 armv7";
 				iOSOpenDevBuildPackageOnAnyBuild = NO;
 				iOSOpenDevCopyOnBuild = NO;
 				iOSOpenDevDevice = "";

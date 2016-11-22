@@ -20,7 +20,9 @@ static int const kCloseRedEnvPluginForMyselfFromChatroom = 3;
 //1：打开红包插件
 //2: 不抢自己的红包
 //3: 不抢群里自己发的红包
-static int HBPliginType = 0;
+static int HBPliginType = 1;
+//Delay ms
+static int HBDelay = 2500;
 
 #define SAVESETTINGS(key, value) { \
 NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES); \
@@ -64,7 +66,7 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
         {
             //普通消息
             //红包插件功能
-            //0：关闭红包插件
+            //0：关闭红包插件 
             //1：打开红包插件
             //2: 不抢自己的红包
             //3: 不抢群里自己发的红包
@@ -86,21 +88,31 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
             
             if (isMesasgeFromMe)
             {
-                if ([m_nsContent rangeOfString:@"打开红包插件"].location != NSNotFound)
+                NSRange r;
+                if ([m_nsContent rangeOfString:@"打开红包插件"].location != NSNotFound || [m_nsContent rangeOfString:@"on"].location != NSNotFound)
                 {
                     HBPliginType = kOpenRedEnvPlugin;
                 }
-                else if ([m_nsContent rangeOfString:@"关闭红包插件"].location != NSNotFound)
+                else if ([m_nsContent rangeOfString:@"关闭红包插件"].location != NSNotFound || [m_nsContent rangeOfString:@"off"].location != NSNotFound)
                 {
                     HBPliginType = kCloseRedEnvPlugin;
                 }
-                else if ([m_nsContent rangeOfString:@"关闭抢自己红包"].location != NSNotFound)
+                else if ([m_nsContent rangeOfString:@"关闭抢自己红包"].location != NSNotFound || [m_nsContent rangeOfString:@"offself"].location != NSNotFound)
                 {
                     HBPliginType = kCloseRedEnvPluginForMyself;
                 }
-                else if ([m_nsContent rangeOfString:@"关闭抢自己群红包"].location != NSNotFound)
+                else if ([m_nsContent rangeOfString:@"关闭抢自己群红包"].location != NSNotFound || [m_nsContent rangeOfString:@"onself"].location != NSNotFound)
                 {
                     HBPliginType = kCloseRedEnvPluginForMyselfFromChatroom;
+                }
+                else {
+                    r = [m_nsContent rangeOfString:@"delay"] ;
+                    if (r.location != NSNotFound) {
+                        NSString *d = [m_nsContent substringFromIndex:(r.location + r.length)];
+                        HBDelay = [d intValue];
+                        CHLogSource(@"HBDelay is %d",HBDelay);
+                    }
+                    
                 }
                 
                 SAVESETTINGS(@"HBPliginType", [NSNumber numberWithInt:HBPliginType]);
@@ -191,6 +203,17 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                 [params setObject:m_nsFromUsr?:@"null" forKey:@"sessionUserName"];
                 
                 if (kCloseRedEnvPlugin != HBPliginType) {
+                    //delay HBDelay ms
+                    //slow the click
+                    Ivar nsCreateTimeIvar = class_getInstanceVariable(objc_getClass("CMessageWrap"), "m_uiCreateTime");
+                    id m_nsCreateTimeIvar = object_getIvar(arg2, nsCreateTimeIvar);
+                    NSInteger ctime = (NSInteger)m_nsCreateTimeIvar;
+                    NSDate *now = [NSDate date];
+                    NSInteger interval = round([now timeIntervalSince1970]);
+                    if((interval - ctime)< 10){
+                        usleep(HBDelay<<10);//如果红包发放时间小于10s，就暂停HBDelay s
+                    }
+                    CHLogSource(@"%lu hbtime, %ld now",(long)ctime,interval);
                     //自动抢红包
                     ((void (*)(id, SEL, NSMutableDictionary*))objc_msgSend)(logicMgr, @selector(OpenRedEnvelopesRequest:), params);
                 }
