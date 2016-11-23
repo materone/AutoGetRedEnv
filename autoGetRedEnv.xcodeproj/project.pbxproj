@@ -207,6 +207,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/opt/iOSOpenDev/bin/iosod --xcbp";
+			showEnvVarsInLog = 0;
 		};
 		EA74ACE61DE34E1700A6723F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -220,6 +221,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = /Users/tony/Dev/AutoGetRedEnv/autoGetRedEnv/copyfile.sh;
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 

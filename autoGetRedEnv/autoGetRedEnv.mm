@@ -22,7 +22,7 @@ static int const kCloseRedEnvPluginForMyselfFromChatroom = 3;
 //3: 不抢群里自己发的红包
 static int HBPliginType = 1;
 //Delay ms
-static int HBDelay = 2500;
+static int HBDelay = 2000;
 
 #define SAVESETTINGS(key, value) { \
 NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES); \
@@ -207,15 +207,25 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                     //slow the click
                     Ivar nsCreateTimeIvar = class_getInstanceVariable(objc_getClass("CMessageWrap"), "m_uiCreateTime");
                     id m_nsCreateTimeIvar = object_getIvar(arg2, nsCreateTimeIvar);
-                    NSInteger ctime = (NSInteger)m_nsCreateTimeIvar;
+                    NSUInteger ctime = (NSInteger)m_nsCreateTimeIvar;
                     NSDate *now = [NSDate date];
-                    NSInteger interval = round([now timeIntervalSince1970]);
-                    if((interval - ctime)< 10){
-                        usleep(HBDelay<<10);//如果红包发放时间小于10s，就暂停HBDelay s
+                    NSUInteger interval = round([now timeIntervalSince1970]);
+                    //如果红包发放时间小于10s，就暂停设定的时间
+                    if((interval - ctime) < 10){
+                        // 创建队列，异步等待延时后执行
+                        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+                        
+                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(HBDelay * NSEC_PER_MSEC)), queue, ^{
+                            // HBDelay 毫秒后需要执行的任务
+                            CHLogSource(@" %lu hbtime, %lu now",(unsigned long)ctime,(unsigned long)interval);
+                            
+                            //自动抢红包
+                            ((void (*)(id, SEL, NSMutableDictionary*))objc_msgSend)(logicMgr, @selector(OpenRedEnvelopesRequest:), params);
+                        });
+                        //usleep(HBDelay<<10);//暂停HBDelay s
+                    }else{
+                        ((void (*)(id, SEL, NSMutableDictionary*))objc_msgSend)(logicMgr, @selector(OpenRedEnvelopesRequest:), params);
                     }
-                    CHLogSource(@"%lu hbtime, %ld now",(long)ctime,interval);
-                    //自动抢红包
-                    ((void (*)(id, SEL, NSMutableDictionary*))objc_msgSend)(logicMgr, @selector(OpenRedEnvelopesRequest:), params);
                 }
                 return;
             }
