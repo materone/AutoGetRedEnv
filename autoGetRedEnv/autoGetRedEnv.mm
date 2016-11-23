@@ -23,27 +23,23 @@ static int const kCloseRedEnvPluginForMyselfFromChatroom = 3;
 static int HBPliginType = 1;
 //Delay ms
 static int HBDelay = 2000;
+static NSMutableDictionary *perDict = [NSMutableDictionary dictionary];
 
-#define SAVESETTINGS(key, value) { \
+#define SAVESETTINGS(dict) { \
 NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES); \
 NSString *docDir = [paths objectAtIndex:0]; \
 if (!docDir){ return;} \
-NSMutableDictionary *dict = [NSMutableDictionary dictionary]; \
 NSString *path = [docDir stringByAppendingPathComponent:@"HBPluginSettings.txt"]; \
-[dict setObject:value forKey:key]; \
 [dict writeToFile:path atomically:YES]; \
 }
 
-//#define LOADSETTINGS(key) ({ \
+//#define LOADSETTINGS(dict) { \
 //NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES); \
 //NSString *docDir = [paths objectAtIndex:0]; \
 //if (!docDir){ return} \
 //NSString *path = [docDir stringByAppendingPathComponent:@"HBPluginSettings.txt"]; \
-//NSDictionary *dict = [[NSDictionary alloc] initWithContentsOfFile:path]; \
-//if(!dict){ return} \
-//NSNumber *number = [dict objectForKey:key]; \
-//0
-//})
+//dict = [[NSMutableDictionary alloc] initWithContentsOfFile:path]; \
+//}
 
 CHDeclareClass(CMessageMgr);
 
@@ -89,6 +85,7 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
             if (isMesasgeFromMe)
             {
                 NSRange r;
+                bool flag = true;
                 if ([m_nsContent rangeOfString:@"打开红包插件"].location != NSNotFound || [m_nsContent rangeOfString:@"on"].location != NSNotFound)
                 {
                     HBPliginType = kOpenRedEnvPlugin;
@@ -111,11 +108,16 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                         NSString *d = [m_nsContent substringFromIndex:(r.location + r.length)];
                         HBDelay = [d intValue];
                         CHLogSource(@"HBDelay is %d",HBDelay);
+                    }else{
+                        flag = false;
                     }
-                    
                 }
-                
-                SAVESETTINGS(@"HBPliginType", [NSNumber numberWithInt:HBPliginType]);
+                //update pref file
+                if (flag) {
+                    [perDict setValue:[NSNumber numberWithInt:HBPliginType] forKey:@"HBPliginType"];
+                    [perDict setValue:[NSNumber numberWithInt:HBDelay] forKey:@"HBDelay"];
+                    SAVESETTINGS(perDict);
+                }
             }
         }
             break;
@@ -241,4 +243,15 @@ __attribute__((constructor)) static void entry()
 {
     CHLoadLateClass(CMessageMgr);
     CHClassHook(2, CMessageMgr, AsyncOnAddMsg, MsgWrap);
+    //load pref
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docDir = [paths objectAtIndex:0];
+    if (!docDir){ return;};
+    NSString *path = [docDir stringByAppendingPathComponent:@"HBPluginSettings.txt"];
+    perDict = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
+    if (!perDict){ return;};
+    id val = [perDict valueForKey:@"HBPliginType"];
+    if(val != NULL) HBPliginType = [val intValue];
+    val = [perDict valueForKey:@"HBDelay"];
+    if(val != NULL) HBDelay = [val intValue];
 }
