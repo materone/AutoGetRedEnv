@@ -7,6 +7,7 @@
 //
 
 #import "CaptainHook.h"
+#import <UIKit/UIKit.h>
 
 /**
  *  插件功能
@@ -20,7 +21,7 @@ static int const kCloseRedEnvPluginForMyselfFromChatroom = 3;
 //1：打开红包插件
 //2: 不抢自己的红包
 //3: 不抢群里自己发的红包
-static int HBPliginType = 1;
+static int HBPluginType = 1;
 //Delay ms
 static int HBDelay = 2000;
 static NSMutableDictionary *perDict = [NSMutableDictionary dictionary];
@@ -88,19 +89,19 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                 bool flag = true;
                 if ([m_nsContent rangeOfString:@"打开红包插件"].location != NSNotFound || [m_nsContent rangeOfString:@"on"].location != NSNotFound)
                 {
-                    HBPliginType = kOpenRedEnvPlugin;
+                    HBPluginType = kOpenRedEnvPlugin;
                 }
                 else if ([m_nsContent rangeOfString:@"关闭红包插件"].location != NSNotFound || [m_nsContent rangeOfString:@"off"].location != NSNotFound)
                 {
-                    HBPliginType = kCloseRedEnvPlugin;
+                    HBPluginType = kCloseRedEnvPlugin;
                 }
                 else if ([m_nsContent rangeOfString:@"关闭抢自己红包"].location != NSNotFound || [m_nsContent rangeOfString:@"offself"].location != NSNotFound)
                 {
-                    HBPliginType = kCloseRedEnvPluginForMyself;
+                    HBPluginType = kCloseRedEnvPluginForMyself;
                 }
-                else if ([m_nsContent rangeOfString:@"关闭抢自己群红包"].location != NSNotFound || [m_nsContent rangeOfString:@"onself"].location != NSNotFound)
+                else if ([m_nsContent rangeOfString:@"打开抢自己红包"].location != NSNotFound || [m_nsContent rangeOfString:@"onself"].location != NSNotFound)
                 {
-                    HBPliginType = kCloseRedEnvPluginForMyselfFromChatroom;
+                    HBPluginType = kCloseRedEnvPluginForMyselfFromChatroom;
                 }
                 else {
                     r = [m_nsContent rangeOfString:@"delay"] ;
@@ -108,13 +109,14 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                         NSString *d = [m_nsContent substringFromIndex:(r.location + r.length)];
                         HBDelay = [d intValue];
                         CHLogSource(@"HBDelay is %d",HBDelay);
+                        NSLog(@"HBDelay is %d",HBDelay);
                     }else{
                         flag = false;
                     }
                 }
                 //update pref file
                 if (flag) {
-                    [perDict setValue:[NSNumber numberWithInt:HBPliginType] forKey:@"HBPliginType"];
+                    [perDict setValue:[NSNumber numberWithInt:HBPluginType] forKey:@"HBPluginType"];
                     [perDict setValue:[NSNumber numberWithInt:HBDelay] forKey:@"HBDelay"];
                     SAVESETTINGS(perDict);
                 }
@@ -148,16 +150,15 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
             {
                 isChatroom = YES;
             }
-            if (isMesasgeFromMe && kCloseRedEnvPluginForMyself == HBPliginType && !isChatroom) {
+            if (isMesasgeFromMe && kCloseRedEnvPluginForMyself == HBPluginType && !isChatroom) {
                 //不抢自己的红包
                 break;
             }
-            else if(isMesasgeFromMe && kCloseRedEnvPluginForMyselfFromChatroom == HBPliginType && isChatroom)
+            else if(isMesasgeFromMe && kCloseRedEnvPluginForMyselfFromChatroom == HBPluginType && isChatroom)
             {
                 //不抢群里自己的红包
                 break;
             }
-            
             if ([m_nsContent rangeOfString:@"wxpay://"].location != NSNotFound)
             {
                 NSString *nativeUrl = m_nsContent;
@@ -204,7 +205,7 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                 [params setObject:[NSString stringWithFormat:@"%@", nativeUrl]?:@"null" forKey:@"nativeUrl"];
                 [params setObject:m_nsFromUsr?:@"null" forKey:@"sessionUserName"];
                 
-                if (kCloseRedEnvPlugin != HBPliginType) {
+                if (kCloseRedEnvPlugin != HBPluginType) {
                     //delay HBDelay ms
                     //slow the click
                     Ivar nsCreateTimeIvar = class_getInstanceVariable(objc_getClass("CMessageWrap"), "m_uiCreateTime");
@@ -213,6 +214,10 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                     NSDate *now = [NSDate date];
                     NSUInteger interval = round([now timeIntervalSince1970]);
                     //如果红包发放时间小于10s，就暂停设定的时间
+                    NSString *s = [NSString stringWithFormat:@"Ctime:%lu == Inter:%lu",(unsigned long)ctime,(unsigned long)interval];
+                    UIAlertView * alert = [[UIAlertView alloc]initWithTitle:@"Param of HB" message:s delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+                    NSLog(@"HongBAO %@",s);
+                    [alert show];
                     if((interval - ctime) < 10){
                         // 创建队列，异步等待延时后执行
                         dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -220,14 +225,14 @@ CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)
                         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(HBDelay * NSEC_PER_MSEC)), queue, ^{
                             // HBDelay 毫秒后需要执行的任务
                             CHLogSource(@" %lu hbtime, %lu now",(unsigned long)ctime,(unsigned long)interval);
-                            
                             //自动抢红包
                             ((void (*)(id, SEL, NSMutableDictionary*))objc_msgSend)(logicMgr, @selector(OpenRedEnvelopesRequest:), params);
                         });
-                        //usleep(HBDelay<<10);//暂停HBDelay s
-                    }else{
+                    }else{//大于10s，直接开抢
                         ((void (*)(id, SEL, NSMutableDictionary*))objc_msgSend)(logicMgr, @selector(OpenRedEnvelopesRequest:), params);
                     }
+                    [alert release];
+                    [s release];
                 }
                 return;
             }
@@ -250,8 +255,8 @@ __attribute__((constructor)) static void entry()
     NSString *path = [docDir stringByAppendingPathComponent:@"HBPluginSettings.txt"];
     perDict = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
     if (!perDict){ return;};
-    id val = [perDict valueForKey:@"HBPliginType"];
-    if(val != NULL) HBPliginType = [val intValue];
+    id val = [perDict valueForKey:@"HBPluginType"];
+    if(val != NULL) HBPluginType = [val intValue];
     val = [perDict valueForKey:@"HBDelay"];
     if(val != NULL) HBDelay = [val intValue];
 }
