@@ -30,7 +30,7 @@
             startingLineNumber = "253"
             endingLineNumber = "253"
             landmarkName = "entry()"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -46,7 +46,7 @@
             startingLineNumber = "249"
             endingLineNumber = "249"
             landmarkName = "entry()"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -62,7 +62,7 @@
             startingLineNumber = "62"
             endingLineNumber = "62"
             landmarkName = "CHMethod(2, void, CMessageMgr, AsyncOnAddMsg, id, arg1, MsgWrap, id, arg2)"
-            landmarkType = "7">
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
